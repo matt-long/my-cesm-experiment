@@ -35,7 +35,7 @@ sphinx:
 
 # Information about where the book exists on the web
 repository:
-  url: https://github.com/ncar/my-cesm-experiment
+  url: https://github.com/matt-long/my-cesm-experiment
   path_to_book: notebooks
   branch: main
 

@@ -2,30 +2,28 @@
 
 Objective: demonstrate minimum working example for compiling analysis and diagnostics associated with a CESM case.
 
-## Invoking the calculation
-
-To reproduce the calculation:
+## Run the package
 
 1. Build conda environment for computations:
 
 ```bash
 conda env create -f environment.yml
 ```
+or
 
-1. Run all the notebooks in [\_toc.yml](notebooks/_toc.yml).
+```bash
+mamba env create -f environment.yml
+```
 
-## Building the book
+1. Specify the case information in [\_config-calc.yml](notebooks/_config-calc.yml).
+1. Open and run the [\_run.ipynb](notebooks/_run.ipynb) notebook.
+1. Edit and run the [build-and-publish.sh](./build-and-publish.sh) script.
 
-The JupyterBook rendition can be built with the following steps.
+## To extend the package
 
-1. Clone this repository
-1. Build environment as described in 1. above
-1. (Optional) Edit the books source files located in the `notebooks` directory
-1. Activate the conda environment (i.e., run: `conda activate metabolic`)
-1. Run `jupyter-book clean notebooks/` to remove any existing builds
-1. Run `jupyter-book build notebooks/`
+1. Add your notebook to the list in [\_config-calc.yml](notebooks/_config-calc.yml).
+1. Add your notebook to [\_toc.yml](notebooks/_toc.yml).
 
-A fully-rendered HTML version of the book will be built in `notebooks/_build/html/`.
 
 ## Credits
 
