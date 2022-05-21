@@ -1,0 +1,13 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: description
+parts:
+  - caption: Ocean Carbon Cycle
+    chapters:
+      - file: output/ocn-fgco2
+  - caption: Ocean Tracers
+    chapters:      
+        sections:
+          - glob: output/ocn-tracer-views-*

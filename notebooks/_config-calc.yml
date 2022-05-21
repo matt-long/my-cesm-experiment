@@ -1,0 +1,37 @@
+output_dir: ./output
+kernel_name: _unison
+project: NCGD0011
+
+
+
+casename: &get_casename
+  smyle-fosi.regional.lat-range-basin.000
+
+
+
+notebooks:
+  description:
+    use_cluster: True
+    parameter_groups:
+      none:
+        casename: *get_casename
+  ocn-fgco2:
+    use_cluster: True
+    parameter_groups:  
+      none:
+        component: pop
+        stream: h
+  
+  ocn-tracer-views:
+    use_cluster: True
+    kernel_name: onets
+    default_params:
+      component: pop
+      stream: h
+    parameter_groups:
+      temperature:
+        variable_id: TEMP
+      salinity:
+        variable_id: SALT
+      oxygen:
+        variable_id: O2
