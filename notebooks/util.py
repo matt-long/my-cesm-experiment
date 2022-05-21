@@ -137,3 +137,5 @@ def get_control_dict():
         manage_conda_kernel(d['kernel_name']).ensure_installed()
 
     return control
+
+
