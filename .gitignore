@@ -130,5 +130,7 @@ dmypy.json
 
 # jupyter-book build directory
 notebooks/_build/
+notebooks/_output/
 .DS_Store
-PET0.RegridWeightGen.Log
+BPET0.RegridWeightGen.Log
+

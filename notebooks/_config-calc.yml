@@ -1,24 +1,25 @@
-output_dir: ./output
+output_dir: ./_output
 kernel_name: _unison
 project: NCGD0011
-
 
 
 casename: &get_casename
   smyle-fosi.regional.lat-range-basin.000
 
 
-
 notebooks:
+  
   description:
-    use_cluster: True
+    use_cluster: False
     parameter_groups:
       none:
         casename: *get_casename
+  
   ocn-fgco2:
     use_cluster: True
     parameter_groups:  
       none:
+        casename: *get_casename
         component: pop
         stream: h
   
@@ -26,6 +27,7 @@ notebooks:
     use_cluster: True
     kernel_name: onets
     default_params:
+      casename: *get_casename
       component: pop
       stream: h
     parameter_groups:
