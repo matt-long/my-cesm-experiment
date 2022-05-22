@@ -1,5 +1,5 @@
 output_dir: ./_output
-kernel_name: _unison
+kernel_name: cesm-exp
 project: NCGD0011
 
 
@@ -25,7 +25,7 @@ notebooks:
   
   ocn-tracer-views:
     use_cluster: True
-    kernel_name: onets
+    kernel_name: cesm-exp
     default_params:
       casename: *get_casename
       component: pop
