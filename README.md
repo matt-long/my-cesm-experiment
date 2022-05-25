@@ -15,14 +15,13 @@ or
 mamba env create -f environment.yml
 ```
 
-1. Specify the case information in [\_config-calc.yml](notebooks/_config-calc.yml).
-1. Open and run the [\_run.ipynb](notebooks/_run.ipynb) notebook.
-1. Edit and run the [build-and-publish.sh](./build-and-publish.sh) script.
+1. **Edit the configuration file**: Specify the case information in [\_config-calc.yml](notebooks/_config-calc.yml).
+1. **Run the notebooks**: Open and run the [\_run.ipynb](notebooks/_run.ipynb) notebook. The notebooks will be run and the computed notebooks save in the `output_dir`, which is specified in [\_config-calc.yml](notebooks/_config-calc.yml). This is the directory from which the Jupyter Book is built.
+1. **Build the book**: Edit and run the [build-and-publish.sh](notebooks/build-and-publish.sh) script.
 
 ## To extend the package
 
-1. Add your notebook to the list in [\_config-calc.yml](notebooks/_config-calc.yml).
-1. Add your notebook to [\_toc.yml](notebooks/_toc.yml).
+1. Add your notebook to the `compute_notebooks` and `book_toc` lists in [\_config-calc.yml](notebooks/_config-calc.yml). Markdown and ipynb files that are in the `book_toc`, but not the `compute_notebooks` list are automatically copied into the `output_dir`.
 
 
 ## Credits
