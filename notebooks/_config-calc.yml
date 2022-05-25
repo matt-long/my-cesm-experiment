@@ -1,25 +1,55 @@
-output_dir: ./_output
-kernel_name: cesm-exp
+###
+# computation config keys
+output_dir: ./_computed-notebooks
+default_kernel_name: cesm-exp
 project: NCGD0011
 
 
-casename: &get_casename
-  smyle-fosi.regional.lat-range-basin.000
+###
+# data sources
+data_sources:
+    casename: &casename
+      smyle-fosi.regional.lat-range-basin.000
 
+###
+# book table of contents
+book_toc:
+  format: jb-book
+  root: description
+  parts:
+    - caption: Ocean Carbon Cycle
+      chapters:
+        - file: ocn-fgco2
+    - caption: Ocean Tracers
+      chapters:
+        - file: intro-ocn-tracer-views
+          sections:
+            - glob: ocn-tracer-views*
 
-notebooks:
-  
+###
+# book _config.yml keys
+book_config_keys:
+  title: My CESM Experiment
+  repository:
+    url: https://github.com/matt-long/my-cesm-experiment
+    path_to_book: notebooks
+    branch: main
+
+###
+# computational notebooks
+compute_notebooks:  
+
   description:
     use_cluster: False
     parameter_groups:
       none:
-        casename: *get_casename
+        casename: *casename
   
   ocn-fgco2:
     use_cluster: True
     parameter_groups:  
       none:
-        casename: *get_casename
+        casename: *casename
         component: pop
         stream: h
   
@@ -27,7 +57,7 @@ notebooks:
     use_cluster: True
     kernel_name: cesm-exp
     default_params:
-      casename: *get_casename
+      casename: *casename
       component: pop
       stream: h
     parameter_groups:

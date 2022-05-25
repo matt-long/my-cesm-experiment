@@ -16,7 +16,6 @@ component_system = dict(
 )
 
 
-
 def _preprocess_pop(ds):
     tb_var = ds.time.attrs["bounds"]
     time_units = ds.time.units
@@ -83,7 +82,8 @@ def to_dataset_dict(case, component, stream, archive_root=None, cdf_kwargs={}):
     for case_i, component_i, stream_i in zip(case, component, stream):        
         assets = _get_assets(case_i, component_i, stream_i, archive_root)
         key = f'{case_i}.{component_i}.{stream_i}'
-        cdf_kwargs = component_cdf_kwargs[component_i]        
-        dsets[key] = xr.open_mfdataset(assets[:12], **cdf_kwargs)
+        cdf_kwargs = component_cdf_kwargs[component_i]
         
+        dsets[key] = xr.open_mfdataset(assets[:12], **cdf_kwargs)
+                
     return dsets

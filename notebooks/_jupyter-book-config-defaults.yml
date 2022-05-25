@@ -10,9 +10,6 @@ author: NCAR
 copyright: '2022'
 logo: logo.png
 
-exclude_patterns:
-  - "*.ipynb" # only include notebooks in the _output directory
-
 # Force re-execution of notebooks on each build.
 execute:
   execute_notebooks: off

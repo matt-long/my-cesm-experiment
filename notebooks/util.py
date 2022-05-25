@@ -1,4 +1,7 @@
 import os
+import shutil
+from glob import glob
+
 import pathlib
 import subprocess
 
@@ -17,6 +20,9 @@ from dask_jobqueue import PBSCluster
 from dask.distributed import Client
 
 
+path_to_here = os.path.dirname(os.path.realpath(__file__))
+
+
 def get_ClusterClient(memory="25GB", project="NCGD0011", on_hub=True):
     cluster = get_Cluster(memory, project, on_hub)
     client = Client(cluster)
@@ -25,35 +31,37 @@ def get_ClusterClient(memory="25GB", project="NCGD0011", on_hub=True):
 
 def get_Cluster(memory="25GB", project="NCGD0011", on_hub=True):
     """return client and cluster"""
-    USER = os.environ['USER']
+    USER = os.environ["USER"]
 
     cluster = PBSCluster(
         cores=1,
         memory=memory,
         processes=1,
-        queue='casper',
-        local_directory=f'/glade/scratch/{USER}/dask-workers',
-        log_directory=f'/glade/scratch/{USER}/dask-workers',
-        resource_spec=f'select=1:ncpus=1:mem={memory}',
+        queue="casper",
+        local_directory=f"/glade/scratch/{USER}/dask-workers",
+        log_directory=f"/glade/scratch/{USER}/dask-workers",
+        resource_spec=f"select=1:ncpus=1:mem={memory}",
         project=project,
-        walltime='06:00:00',
-        interface='ib0',
+        walltime="06:00:00",
+        interface="ib0",
     )
 
     if on_hub:
-        jupyterhub_server_name = os.environ.get('JUPYTERHUB_SERVER_NAME', None)
-        dashboard_link = 'https://jupyterhub.hpc.ucar.edu/stable/user/{USER}/proxy/{port}/status'
+        jupyterhub_server_name = os.environ.get("JUPYTERHUB_SERVER_NAME", None)
+        dashboard_link = (
+            "https://jupyterhub.hpc.ucar.edu/stable/user/{USER}/proxy/{port}/status"
+        )
         if jupyterhub_server_name:
             dashboard_link = (
-                'https://jupyterhub.hpc.ucar.edu/stable/user/'
-                + '{USER}'
-                + f'/{jupyterhub_server_name}/proxy/'
-                + '{port}/status'
+                "https://jupyterhub.hpc.ucar.edu/stable/user/"
+                + "{USER}"
+                + f"/{jupyterhub_server_name}/proxy/"
+                + "{port}/status"
             )
     else:
-        dashboard_link = 'http://localhost:8787/status'
+        dashboard_link = "http://localhost:8787/status"
 
-    dask.config.set({'distributed.dashboard.link': dashboard_link})
+    dask.config.set({"distributed.dashboard.link": dashboard_link})
     return cluster
 
 
@@ -65,9 +73,9 @@ class manage_conda_kernel(object):
 
     def getcwd(self):
         """get the directory of a conda kernel by name"""
-        command = ['conda', 'env', 'list', '--json']
-        output = subprocess.check_output(command).decode('ascii')
-        envs = json.loads(output)['envs']
+        command = ["conda", "env", "list", "--json"]
+        output = subprocess.check_output(command).decode("ascii")
+        envs = json.loads(output)["envs"]
 
         for env in envs:
             env = pathlib.Path(env)
@@ -88,10 +96,10 @@ class manage_conda_kernel(object):
         path = self.getcwd()
         if path is None:
             raise ValueError(f'conda kernel "{self.kernel_name}" not found')
-        path = path / pathlib.Path('share/jupyter/kernels')
+        path = path / pathlib.Path("share/jupyter/kernels")
 
         kernels_in_conda_env = jupyter_client.kernelspec._list_kernels_in(path)
-        py_kernel_key = [k for k in kernels_in_conda_env.keys() if 'python' in k][0]
+        py_kernel_key = [k for k in kernels_in_conda_env.keys() if "python" in k][0]
         kernel_path = kernels_in_conda_env[py_kernel_key]
 
         jupyter_client.kernelspec.install_kernel_spec(
@@ -118,24 +126,95 @@ pm.engines.papermill_engines._engines["md_jinja"] = md_jinja_engine
 
 
 def get_control_dict():
-    with open('_config-calc.yml', 'r') as fid:
+    with open("_config-calc.yml", "r") as fid:
         control = yaml.safe_load(fid)
 
     os.makedirs(control["output_dir"], exist_ok=True)
 
-    default_kernel_name = control.pop('kernel_name', None) 
+    default_kernel_name = control.pop("default_kernel_name", None)
 
     if default_kernel_name is not None:
-        for d in control['notebooks'].values():
-            if 'kernel_name' not in d:
-                d['kernel_name'] = default_kernel_name
+        for d in control["compute_notebooks"].values():
+            if "kernel_name" not in d:
+                d["kernel_name"] = default_kernel_name
     else:
-        for nb, d in control['notebooks'].items():
-            assert 'kernel_name' in d, f'kernel information missing for {nb}.ipynb'
+        for nb, d in control["compute_notebooks"].items():
+            assert "kernel_name" in d, f"kernel information missing for {nb}.ipynb"
 
-    for nb, d in control['notebooks'].items():
-        manage_conda_kernel(d['kernel_name']).ensure_installed()
+    for nb, d in control["compute_notebooks"].items():
+        manage_conda_kernel(d["kernel_name"]).ensure_installed()
 
     return control
 
 
+def setup_book():
+    """setup output jupyter book"""
+
+    control = get_control_dict()
+
+    # ensure directory
+    output_dir = control["output_dir"]
+    os.makedirs(output_dir, exist_ok=True)
+
+    # write table of contents file
+    toc = control["book_toc"]
+    with open(f"{output_dir}/_toc.yml", "w") as fid:
+        yaml.dump(toc, fid, sort_keys=False)
+
+    # read config defaults
+    with open(f"{path_to_here}/_jupyter-book-config-defaults.yml", "r") as fid:
+        config = yaml.safe_load(fid)
+
+    # update defaults
+    config.update(control["book_config_keys"])
+
+    # write config file
+    with open(f"{output_dir}/_config.yml", "w") as fid:
+        yaml.dump(config, fid, sort_keys=False)
+
+    # check for files that are not computed
+    # get list of computational notebooks
+    compute_notebooks = [f"{f}.ipynb" for f in control["compute_notebooks"].keys()]
+
+    # get toc files; ignore glob expressions
+    toc_files = get_toc_files(toc, include_glob=False)
+    copy_files = list(set(toc_files) - set(compute_notebooks))
+
+    for src in copy_files:
+        shutil.copyfile(src, f"{output_dir}/{src}")
+        
+    # TODO: check that all notebooks are in toc?
+    #       requires resolving glob expression
+
+
+def get_toc_files(toc_dict, include_glob=True):
+    """return a list of files in the _toc.yml"""
+
+    def _toc_files(toc_dict, file_list=[]):
+        for key, value in toc_dict.items():
+            if key in ["root", "file", "glob"]:
+                if not include_glob and key == "glob":
+                    continue
+                file = (
+                    glob(value)
+                    if key == "glob"
+                    else [
+                        f"{value}.{ext}"
+                        for ext in ["ipynb", "md"]
+                        if os.path.exists(f"{value}.{ext}")
+                    ]
+                )
+
+                assert len(file), f"no files found: {value}"
+                assert len(file) == 1, f"multiple files found: {value}"
+                file_list.append(file[0])
+
+            elif key in ["chapters", "sections", "parts"]:
+                file_list_ext = []
+                for sub in value:
+                    file_list_ext = _toc_files(sub, file_list_ext)
+                file_list.extend(file_list_ext)
+
+        return file_list
+
+    return _toc_files(toc_dict)
