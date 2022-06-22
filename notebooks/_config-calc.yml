@@ -1,15 +1,15 @@
 ###
-# computation config keys
-output_dir: ./_computed-notebooks
-default_kernel_name: cesm-exp
-project: NCGD0011
-
-
-###
 # data sources
 data_sources:
     casename: &casename
       smyle-fosi.regional.lat-range-basin.000
+
+###
+# computation config keys
+output_dir: ./_computed-notebooks/*casename
+default_kernel_name: cesm-exp
+project: NCGD0011
+
 
 ###
 # book table of contents
